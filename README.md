@@ -1,0 +1,1 @@
+The goal of this repository is to generate depth maps images from 3D woodblock models.  
