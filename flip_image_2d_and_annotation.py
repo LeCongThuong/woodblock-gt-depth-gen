@@ -15,7 +15,7 @@ def flip_annotation_horizontal(np_bbox, image_width):
     """
     Flip annotation
     """
-    np_bbox[:, 1] = image_width - 1 - np_bbox[:, 1]
+    np_bbox[:, 0] = image_width - 1 - np_bbox[:, 0]
     return np_bbox
 
 
@@ -54,6 +54,7 @@ def write_bboxes(via_anno, new_bboxes_points):
 
 def flip_image_and_annotation(image_path, via_json_path, dest_via_json_path, dest_image_path):
     image = cv2.imread(image_path)
+    print(image.shape)
     via_anno = read_json_file(via_json_path)
     flipped_img = flip_image_horizontal(image)
     bboxes_points = get_bboxes(via_anno)
