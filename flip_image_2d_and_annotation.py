@@ -52,7 +52,7 @@ def write_bboxes(via_anno, new_bboxes_points):
     return via_anno
 
 
-def flip_image_and_annotation(image_path, via_json_path, dest_via_json_path):
+def flip_image_and_annotation(image_path, via_json_path, dest_via_json_path, dest_image_path):
     image = cv2.imread(image_path)
     via_anno = read_json_file(via_json_path)
     flipped_img = flip_image_horizontal(image)
@@ -63,6 +63,7 @@ def flip_image_and_annotation(image_path, via_json_path, dest_via_json_path):
         new_bboxes_points.append(new_bbox_points)
     via_anno = write_bboxes(via_anno, new_bboxes_points)
     write_json_file(via_anno, dest_via_json_path)
+    cv2.imwrite(dest_image_path, flipped_img)
 
 
 if __name__ == '__main__':
