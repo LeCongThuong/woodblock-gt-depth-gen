@@ -37,7 +37,7 @@ def get_bboxes(via_anno):
         for poly_info in poly_info_list:
             x_point_list = poly_info["shape_attributes"]["all_points_x"]
             y_point_list = poly_info["shape_attributes"]["all_points_y"]
-            points = np.stack((x_point_list, y_point_list), axis=-1)
+            points = np.stack((x_point_list, y_point_list), axis=-1).astype(np.int16)
             bboxes_points.append(points)
     return bboxes_points
 
@@ -46,8 +46,8 @@ def write_bboxes(via_anno, new_bboxes_points):
     for key, anno_info in via_anno.items():
         poly_info_list = anno_info["regions"]
         for poly_info in poly_info_list:
-            poly_info["shape_attributes"]["all_points_x"] = new_bboxes_points[0][0]
-            poly_info["shape_attributes"]["all_points_y"] = new_bboxes_points[0][1]
+            poly_info["shape_attributes"]["all_points_x"] = [int(n) for n in new_bboxes_points[0][:, 0]]
+            poly_info["shape_attributes"]["all_points_y"] = [int(n) for n in new_bboxes_points[0][:, 1]]
             new_bboxes_points.pop(0)
     return via_anno
 
@@ -67,8 +67,9 @@ def flip_image_and_annotation(image_path, via_json_path, dest_via_json_path, des
 
 
 if __name__ == '__main__':
-    image_path = ""
-    via_json_path = ""
-    dest_via_json_path = ""
-    flip_image_and_annotation(image_path, via_json_path, dest_via_json_path)
+    image_path = "data/images_2d/08360a_3.jpg"
+    via_json_path = "/mnt/hdd/thuonglc/mocban/data_synthesis/woodblock-gt-depth-gen/labels/via_labels/08360a_3.json"
+    dest_via_json_path = "outputs/via-flip-annotation/flip_08360a_3.json"
+    dest_image_path = "outputs/flip-images/flip_08360a_3.jpg"
+    flip_image_and_annotation(image_path, via_json_path, dest_via_json_path, dest_image_path)
 
