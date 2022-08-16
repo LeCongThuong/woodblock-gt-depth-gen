@@ -69,7 +69,7 @@ def flip_image_and_annotation(image_path, via_json_path, dest_via_json_path, des
 
 if __name__ == '__main__':
     image_path = "data/images_2d/08360a_3.jpg"
-    via_json_path = "/mnt/hdd/thuonglc/mocban/data_synthesis/woodblock-gt-depth-gen/labels/via_labels/08360a_3.json"
+    via_json_path = "labels/via_labels/08360a_3.json"
     dest_via_json_path = "outputs/via-flip-annotation/flip_08360a_3.json"
     dest_image_path = "outputs/flip-images/flip_08360a_3.jpg"
     flip_image_and_annotation(image_path, via_json_path, dest_via_json_path, dest_image_path)

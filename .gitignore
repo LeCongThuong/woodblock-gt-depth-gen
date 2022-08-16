@@ -1,3 +1,7 @@
 .idea/
 __pycache__/
 .ipynb_checkpoints/
+data/
+labels/
+notebooks/character_3d/
+notebooks/character_3d_aligned/
