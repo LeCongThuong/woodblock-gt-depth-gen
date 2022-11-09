@@ -5,3 +5,12 @@ data/
 labels/
 notebooks/character_3d/
 notebooks/character_3d_aligned/
+/notebooks/woodblock_depth_xyz/
+/notebooks/woodblock_depth_z/
+/notebooks/woodblock_inverted_matrix/
+/notebooks/woodblock_xyz/
+/notebooks/pitch_map/
+/notebooks/character_scan_2d/
+/notebooks/character_depth_imgs/
+/Open3D/
+/outputs/
