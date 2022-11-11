@@ -4,6 +4,7 @@ import numpy as np
 from tqdm.auto import tqdm
 from math import sqrt
 from model_transform_utils import get_surface_equation_coeffs, get_3d_transform_matrix, transform_points
+from pointcloud_to_depth import convert_pc_to_depth_map
 
 
 def get_bboxes_bound(bboxes_points_list, z_min_bound=-20, z_max_bound=20):
@@ -137,8 +138,14 @@ def get_aligned_3d_characters(character_point_list, normal_vector_list):
     return aligned_pc_point_list
 
 
-
-
+def get_character_depth_imgs(character_3d_list, res=(512, 512, 255)):
+    depth_map_img_list = []
+    img_inverted_matrix_list = []
+    for character_3d in tqdm(character_3d_list):
+        img_inverted_matrix, normalized_depth_img = convert_pc_to_depth_map(character_3d, res=res)
+        depth_map_img_list.append(normalized_depth_img)
+        img_inverted_matrix_list.append(img_inverted_matrix)
+    return depth_map_img_list, img_inverted_matrix_list
 
 
 
