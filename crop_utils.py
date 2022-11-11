@@ -3,8 +3,11 @@ from pathlib import Path
 import numpy as np
 from tqdm.auto import tqdm
 from math import sqrt
-from model_transform_utils import get_surface_equation_coeffs, get_3d_transform_matrix, transform_points
+from model_transform_utils import get_surface_equation_coeffs
 from pointcloud_to_depth import convert_pc_to_depth_map
+import cv2
+from model_transform import raw_pitch_transform_3d_points
+from mapping_utils import get_3d_points_by_mapping_2d_3d_points
 
 
 def get_bboxes_bound(bboxes_points_list, z_min_bound=-20, z_max_bound=20):
@@ -138,6 +141,24 @@ def get_aligned_3d_characters(character_point_list, normal_vector_list):
     return aligned_pc_point_list
 
 
+def crop_3d_characters(woodblock_points, woodblock_floor_points, character_surface_points, bboxes_2d_list, point_2d_list, point_depth_list, inverted_matrix, z_min_bound=-25, z_max_bound=25):
+    bboxes_3d_list = get_3d_points_by_mapping_2d_3d_points(bboxes_2d_list, inverted_matrix, point_2d_list, point_depth_list)
+    character_rect_bound_list = get_bboxes_bound(bboxes_3d_list, z_min_bound, z_max_bound)
+
+    character_surface_points = raw_pitch_transform_3d_points(woodblock_floor_points, character_surface_points, point_depth_list)
+    character_point_list = crop_polygon_3d_characters(woodblock_points, bboxes_3d_list, z_min_bound, z_max_bound)
+
+    surface_2d_coeffs = get_surface_equation_coeffs(np.asarray(character_surface_points.vertices), order=2)
+    normal_vector_list = get_all_normal_vectors(character_rect_bound_list, surface_2d_coeffs)
+
+    aligned_3d_character_list = get_aligned_3d_characters(character_point_list, normal_vector_list)
+
+    del character_point_list
+    del normal_vector_list
+    del character_rect_bound_list
+    return aligned_3d_character_list
+
+
 def get_character_depth_imgs(character_3d_list, res=(512, 512, 255)):
     depth_map_img_list = []
     img_inverted_matrix_list = []
@@ -148,5 +169,50 @@ def get_character_depth_imgs(character_3d_list, res=(512, 512, 255)):
     return depth_map_img_list, img_inverted_matrix_list
 
 
+def resize_image_to_square(image, dst=512, color=(255, 255, 255)):
+    """
+    Resize with padding, first resize image such that max edge get dst, then pad 2 sides of the other edge to dest
+    :param image: cv2 image
+    :param dst: target size
+    :param color: constant pad value
+    :return: square image
+    """
+    desired_size = dst
 
+    im = image
+    height, width = im.shape[:2]  # old_size is in (height, width) format
+
+    delta = abs(height - width)
+    if height > width:
+        top, bottom, left, right = 0, 0, delta // 2, delta - (delta // 2)
+    else:
+        top, bottom, left, right =  delta // 2, delta - (delta // 2), 0, 0
+    color = color
+    new_img = cv2.copyMakeBorder(im, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)
+    new_img = cv2.resize(new_img, (dst, dst))
+    return new_img
+
+
+def crop_2d_img(img, pts):
+    pts = np.array(pts, dtype=np.int32)
+    ## (1) Crop the bounding rect
+    rect = cv2.boundingRect(pts)
+    x, y, w, h = rect
+    croped = img[y:y+h, x:x+w].copy()
+
+    ## (2) make mask
+    pts = pts - pts.min(axis=0)
+
+    mask = np.zeros(croped.shape[:2], np.uint8)
+    cv2.drawContours(mask, [pts], -1, (255, 255, 255), -1, cv2.LINE_AA)
+
+    ## (3) do bit-op
+    dst = cv2.bitwise_and(croped, croped, mask=mask)
+
+    ## (4) add the white background
+    bg = np.ones_like(croped, np.uint8)*255
+    cv2.bitwise_not(bg, bg, mask=mask)
+    dst2 = bg + dst
+    dst2 = resize_image_to_square(dst2)
+    return dst2
 
