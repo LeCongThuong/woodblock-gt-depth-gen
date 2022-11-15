@@ -1,12 +1,12 @@
 from pointcloud_to_depth import convert_pc_to_depth_map
-from model_transform import pitch_transform_3d_model
+from model_transform import pitch_transform_3d_points
 import argparse
 from pathlib import Path
 from model_transform_utils import read_stl_file
 import cv2
 from tqdm.auto import tqdm
 import gc
-
+import open3d as o3d
 
 def parse_aug():
     parser = argparse.ArgumentParser(prog='Generate gt depth maps')
@@ -40,7 +40,8 @@ def main():
             surface_path = surface_path_list[index]
             pc_surface_points = read_stl_file(surface_path)
             pc_woodblock_points = read_stl_file(woodblock_path)
-            pc_woodblock_points = pitch_transform_3d_model(pc_surface_points, pc_woodblock_points)
+            pc_woodblock_points = pitch_transform_3d_points(pc_surface_points, pc_woodblock_points)
+            # o3d.io.write_triangle_mesh(f'notebooks/woodblock_z/{Path(surface_path).stem}_z.stl', pc_woodblock_points)
             _, normalized_depth_img = convert_pc_to_depth_map(pc_woodblock_points)
             cv2.imwrite(str(Path(args.depth_dest) / f'{woodblock_path.stem}_z.png'), normalized_depth_img)
             del pc_woodblock_points

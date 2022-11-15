@@ -142,13 +142,32 @@ def get_aligned_3d_characters(character_point_list, normal_vector_list):
 
 
 def crop_3d_characters(woodblock_points, woodblock_floor_points, character_surface_points, bboxes_2d_list, point_2d_list, point_depth_list, inverted_matrix, z_min_bound=-25, z_max_bound=25):
+    """
+    Crop 3D characters from a whole woodblock. To do that:
+    Firstly, get 3D points bounding boxes by mapping from 2D bboxes
+    Secondly, crop vanilla characters using 3D points bounding boxes
+    Thirdly, get aligned characters:
+        + Get 2-degree surface equation of woodblock
+        + Get normal vectors of each character
+        +  Pitch and raw rotation to get aligned character
+    :param woodblock_points: whole woodblock
+    :param woodblock_floor_points: points on floor of woodblock
+    :param character_surface_points: points on surface of characters
+    :param bboxes_2d_list: bounding boxes on 2D scan images
+    :param point_2d_list:  registered points on 2D scan images
+    :param point_depth_list: registered points on depth images
+    :param inverted_matrix: matrix to get back points on 3D model from points on depth map
+    :param z_min_bound: min bounding of z axis
+    :param z_max_bound: max bounding of z axis
+    :return: 3D aligned mesh of all 3D characters
+    """
     bboxes_3d_list = get_3d_points_by_mapping_2d_3d_points(bboxes_2d_list, inverted_matrix, point_2d_list, point_depth_list)
     character_rect_bound_list = get_bboxes_bound(bboxes_3d_list, z_min_bound, z_max_bound)
 
     character_surface_points = raw_pitch_transform_3d_points(woodblock_floor_points, character_surface_points, point_depth_list)
+    surface_2d_coeffs = get_surface_equation_coeffs(np.asarray(character_surface_points.vertices), order=2)
     character_point_list = crop_polygon_3d_characters(woodblock_points, bboxes_3d_list, z_min_bound, z_max_bound)
 
-    surface_2d_coeffs = get_surface_equation_coeffs(np.asarray(character_surface_points.vertices), order=2)
     normal_vector_list = get_all_normal_vectors(character_rect_bound_list, surface_2d_coeffs)
 
     aligned_3d_character_list = get_aligned_3d_characters(character_point_list, normal_vector_list)

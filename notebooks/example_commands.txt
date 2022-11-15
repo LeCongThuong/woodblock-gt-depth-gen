@@ -1,1 +1,12 @@
+Rotate 3D image
+python3 process_pitching_yaw_transform.py -woodblock "/media/hmi/Expansion/MOCBAN_TEST_OK/whole_woodblock/whole_02801_mk30.stl" -surface "/media/hmi/Expansion/MOCBAN_TEST_OK/floor_woodblock_points/floor_02801_mk30.stl" -border "notebooks/pitch_map/pitch_map_02801_mk30.json" -woodblock_dest "notebooks/woodblock_xyz" -depth_dest "notebooks/woodblock_depth_xyz" -inverted_matrix "notebooks/woodblock_inverted_matrix"
+
+python3 process_pitching_transform.py -woodblock "notebooks/test_moc_ban_ok/whole_02801_mk30.stl" -surface "notebooks/test_moc_ban_ok/floor_02801_mk30.stl" -depth_dest "notebooks/woodblock_depth_z"
+
+
+
+
+Get aligned 3D character 
 python3 cropping.py -woodblock "notebooks/woodblock_xyz/whole_02801_mk29_xyz.stl" -character_surface "/media/hmi/Expansion/MOCBAN_TEST_OK/surface_woodblock_points/surface_02801_mk29.stl" -floor "/media/hmi/Expansion/MOCBAN_TEST_OK/floor_woodblock_points/floor_02801_mk29.stl" -pitch_map "notebooks/pitch_map/pitch_map_02801_mk29.json" -sina_nom_anno "notebooks/sina_nom_annos/02801_mk29.json" -inverted_matrix "notebooks/woodblock_inverted_matrix/whole_02801_mk29_xyz.npy" -character_dest "notebooks/character_3d_aligned" -scan_img "notebooks/scan_imgs/02801_mk29.jpg"
+
+

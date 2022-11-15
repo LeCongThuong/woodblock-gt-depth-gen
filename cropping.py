@@ -91,5 +91,3 @@ if __name__ == '__main__':
         for s_index, bbox in enumerate(bboxes_2d_list):
             character_img = crop_2d_img(print_img, bbox)
             cv2.imwrite(str(os.path.join(args.character_dest, Path(args.sina_nom_anno).stem, f'print/{s_index}.png')), character_img)
-    # sample command
-    # python3 cropping.py -woodblock "notebooks/woodblock_xyz/whole_02801_mk29_xyz.stl" -character_surface "/media/hmi/Expansion/MOCBAN_TEST_OK/surface_woodblock_points/surface_02801_mk29.stl" -floor "/media/hmi/Expansion/MOCBAN_TEST_OK/floor_woodblock_points/floor_02801_mk29.stl" -pitch_map "notebooks/pitch_map/pitch_map_02801_mk29.json" -sina_nom_anno "/media/hmi/Expansion/MOCBAN_TEST_OK/tt4_samples/tt4/02801_mk29/02801_mk29.json" -inverted_matrix "notebooks/woodblock_inverted_matrix/whole_02801_mk29_xyz.npy" -character_dest "notebooks/character_3d_aligned"

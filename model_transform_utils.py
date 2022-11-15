@@ -119,11 +119,11 @@ def transform_points(np_pc_points, transform_matrix):
     homo_pc_3d = homo_pc_3d.T[:, :3]
 
     mean_vector = np.mean(homo_pc_3d, axis=0)
-    if mean_vector[2] < 0:
-        # upsiding if front face is downside
-        homo_pc_3d[:, 2] = - homo_pc_3d[:, 2]
-        homo_pc_3d[:, 0] = - homo_pc_3d[:, 0]
-        mean_vector = np.mean(homo_pc_3d, axis=0)
+    # if mean_vector[2] < 0:
+    #     # upsiding if front face is downside
+    #     homo_pc_3d[:, 2] = - homo_pc_3d[:, 2]
+    #     homo_pc_3d[:, 0] = - homo_pc_3d[:, 0]
+    #     mean_vector = np.mean(homo_pc_3d, axis=0)
     mean_vector[2] = 0
     homo_pc_3d = homo_pc_3d - mean_vector
     return homo_pc_3d
