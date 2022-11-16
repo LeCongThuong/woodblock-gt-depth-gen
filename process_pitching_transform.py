@@ -8,6 +8,7 @@ from tqdm.auto import tqdm
 import gc
 import open3d as o3d
 
+
 def parse_aug():
     parser = argparse.ArgumentParser(prog='Generate gt depth maps')
     parser.add_argument('-woodblock', '--woodblock_path', help='path to whole woodblock dir/file')

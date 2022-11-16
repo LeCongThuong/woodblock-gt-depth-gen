@@ -46,3 +46,5 @@ def parse_bboxes_list_from_sino_nom_anno_file(sino_nom_file):
     return bboxes_list
 
 
+
+

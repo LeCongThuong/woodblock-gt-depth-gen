@@ -35,7 +35,7 @@ def get_pitch_rot_matrix(plane_coeff):
     :param plane_coeff: coefficients of the 3D model surface equation
     :return: pitch matrix
     """
-    a, b, c, d = plane_coeff
+    a, b, c, _ = plane_coeff
     cos_phi = calc_cos_phi(a, b, c)
     sin_phi = calc_sin_phi(a, b, c)
     u1 = calc_u1(a, b, c)
@@ -149,3 +149,15 @@ def get_surface_equation_coeffs(data, order=2):
         A = np.c_[np.ones(data.shape[0]), data[:, :2], np.prod(data[:, :2], axis=1), data[:, :2]**2]
         C, _, _, _ = scipy.linalg.lstsq(A, data[:, 2])
         return [C[0], C[1], C[2], -1, C[3], C[4], C[5]]
+
+
+def get_border_points_from_triangle_mesh(border_tri_mesh):
+    np_tri_mesh = np.asarray(border_tri_mesh.triangles)
+    np_3d_points = np.asarray(border_tri_mesh.vertices)
+    border_points = []
+    for i in range(np_tri_mesh.shape[0]):
+        mean_point = np.mean(np_3d_points[np_tri_mesh[i], : ], axis=0).tolist()[:2]
+        border_points.append(mean_point)
+    border_points = np.asarray(border_points)
+    return border_points
+

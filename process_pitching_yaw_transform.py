@@ -3,7 +3,7 @@ from model_transform import raw_pitch_transform_3d_points
 from parsing import get_point_from_via_file
 import argparse
 from pathlib import Path
-from model_transform_utils import read_stl_file
+from model_transform_utils import read_stl_file, get_border_points_from_triangle_mesh
 import cv2
 from tqdm.auto import tqdm
 import gc
@@ -44,7 +44,9 @@ def main():
         border_path = border_path_list[index]
         pc_surface_points = read_stl_file(surface_path)
         pc_woodblock_points = read_stl_file(woodblock_path)
-        [_, border_points] = get_point_from_via_file(border_path, keyword='whole')
+        tri_mesh_points = read_stl_file(border_path)
+        # [_, border_points] = get_point_from_via_file(border_path, keyword='whole')
+        border_points = get_border_points_from_triangle_mesh(tri_mesh_points)
         pc_woodblock_points = raw_pitch_transform_3d_points(pc_surface_points, pc_woodblock_points, border_points)
         normalized_inverted_matrix, normalized_depth_img = convert_pc_to_depth_map(pc_woodblock_points)
 
