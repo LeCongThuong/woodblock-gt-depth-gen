@@ -4,6 +4,7 @@ from parsing import get_point_from_via_file, parse_bboxes_list_from_sino_nom_ann
 import argparse
 import os
 import cv2
+from config import args
 
 
 def parse_aug():
@@ -32,7 +33,7 @@ if __name__ == '__main__':
     # inverted_matrix_path = "notebooks/woodblock_inverted_matrix/whole_02801_mk29_xyz.npy"
     #
     # aligned_character_path = Path("notebooks/character_3d_aligned")/Path(sina_nom_bbox_path).stem
-    args = parse_aug()
+    # args = parse_aug()
     Path(os.path.join(args.character_dest, Path(args.sina_nom_anno).stem, 'stl')).mkdir(parents=True, exist_ok=True)
     Path(os.path.join(args.character_dest, Path(args.sina_nom_anno).stem, 'depth')).mkdir(parents=True, exist_ok=True)
     Path(os.path.join(args.character_dest, Path(args.sina_nom_anno).stem, 'print')).mkdir(parents=True, exist_ok=True)
@@ -42,6 +43,7 @@ if __name__ == '__main__':
         floor_path_list = [Path(args.floor)]
         character_surface_list = [Path(args.character_surface)]
         pitch_map_list = [Path(args.pitch_map)]
+        raw_pitch_map_list = [Path(args.raw_pitch_map)]
         inverted_map_list = [Path(args.inverted_matrix)]
         sina_nom_bbox_list = [Path(args.sina_nom_anno)]
         scan_img_list = [Path(args.scan_img)]
@@ -51,6 +53,7 @@ if __name__ == '__main__':
         floor_path_list = list(Path(args.floor).glob("*.stl"))
         character_surface_list = list(Path(args.character_surface).glob("*.stl"))
         pitch_map_list = list(Path(args.pitch_map).glob("*.json"))
+        raw_pitch_map_list = list(Path(args.raw_pitch_map).glob("*.json"))
         inverted_map_list = list(Path(args.inverted_matrix).glob("*.npy"))
         sina_nom_bbox_list = list(Path(args.sina_nom_anno).glob("*.json"))
         scan_img_list = list(Path(args.scan_img).glob("*.jpg"))
@@ -69,17 +72,21 @@ if __name__ == '__main__':
         woodblock_floor_points = read_stl_file(floor_path_list[index])
         character_surface_points = read_stl_file(character_surface_list[index])
         [point_2d_list, point_depth_list] = get_point_from_via_file(pitch_map_list[index], keyword='whole')
+        [_, raw_point_depth_list] = get_point_from_via_file(raw_pitch_map_list[index], keyword='whole')
         bboxes_2d_list = parse_bboxes_list_from_sino_nom_anno_file(sina_nom_bbox_list[index])
 
         aligned_3d_character_list = crop_3d_characters(woodblock_points,
-                                                    woodblock_floor_points,
-                                                    character_surface_points,
-                                                    bboxes_2d_list,
-                                                    point_2d_list,
-                                                    point_depth_list,
-                                                    inverted_matrix)
+                                                        woodblock_floor_points,
+                                                        character_surface_points,
+                                                        bboxes_2d_list,
+                                                        point_2d_list,
+                                                        point_depth_list,
+                                                        raw_point_depth_list,
+                                                        inverted_matrix)
 
         for w_index, aligned_3d_character in enumerate(aligned_3d_character_list):
+            # aligned_3d_character = o3d.geometry.TriangleMesh.compute_triangle_normals(aligned_3d_character)
+            # aligned_3d_character.remove_duplicated_vertices()
             o3d.io.write_triangle_mesh(os.path.join(args.character_dest, Path(args.sina_nom_anno).stem, f'stl/{w_index}.stl'), aligned_3d_character)
 
         depth_img_list, _ = get_character_depth_imgs(aligned_3d_character_list)

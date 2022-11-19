@@ -6,6 +6,7 @@ from pathlib import Path
 
 def raw_pitch_transform_3d_points(pc_surface_points, pc_woodblock_points, np_border_points):
     surface_coeffs = get_surface_equation_coeffs(np.asarray(pc_surface_points.vertices), order=1)
+    print(surface_coeffs)
     transform_matrix = get_3d_transform_matrix(surface_coeffs, np_border_points)
     pc_woodblock_points.vertices = o3d.utility.Vector3dVector(transform_points(np.asarray(pc_woodblock_points.vertices), transform_matrix))
     pc_woodblock_points = o3d.geometry.TriangleMesh.compute_triangle_normals(pc_woodblock_points)
@@ -14,13 +15,22 @@ def raw_pitch_transform_3d_points(pc_surface_points, pc_woodblock_points, np_bor
     return pc_woodblock_points
 
 
-def pitch_transform_3d_points(pc_surface_points, pc_woodblock_points):
-    surface_coeffs = get_surface_equation_coeffs(np.asarray(pc_surface_points.vertices), order=1)
+def pitch_transform_3d_points(pc_floor_points, pc_woodblock_points):
+    # def _do_upside(pc_points):
+    #     np_points = np.asarray(pc_points.vertices)
+    #     pc_points.vertices = o3d.utility.Vector3dVector(np_points)
+    #     pc_points = o3d.geometry.TriangleMesh.compute_triangle_normals(pc_points)
+    #     pc_points.remove_duplicated_vertices()
+    #     return pc_points
+
+    surface_coeffs = get_surface_equation_coeffs(np.asarray(pc_floor_points.vertices), order=1)
     transform_matrix = get_3d_transform_matrix(surface_coeffs)
     pc_woodblock_points.vertices = o3d.utility.Vector3dVector(transform_points(np.asarray(pc_woodblock_points.vertices), transform_matrix))
     pc_woodblock_points = o3d.geometry.TriangleMesh.compute_triangle_normals(pc_woodblock_points)
     pc_woodblock_points.remove_duplicated_vertices()
-    # o3d.io.write_triangle_mesh(f'{saved_stl_path}/{Path(saved_stl_path).stem}_z.stl', pc_woodblock_points)
+    # if upside:
+    #     pc_floor_points = _do_upside(pc_floor_points)
+    #     pc_surface_points = _do_upside(pc_surface_points)
     return pc_woodblock_points
 
 

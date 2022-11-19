@@ -43,7 +43,7 @@ def ray_tracing_depth_map(pc_mesh, side_range=(-12, 12), fwd_range=(-12, 12), re
     point_mesh = np.stack((x_mesh_flat, y_mesh_flat, z_mesh_flat), axis=1)
     rays = np.concatenate((point_mesh, direction), axis=1)
     rays = o3d.core.Tensor(rays, dtype=o3d.core.Dtype.Float32)
-    ans = scene.cast_rays(rays)
+    ans = scene.cast_rays(rays, nthreads=8)
     pixel_values = ans['t_hit'].numpy()
     pixel_values = pixel_values.reshape((res[0], res[1]))
     _, z_max_depth = -np.sort(-np.unique(pixel_values))[:2]
@@ -89,3 +89,11 @@ def convert_pc_to_depth_map(stl_path, res=(12000, 12000, 255)):
                                                                       max_z_distance=spatial_limit["z_max"] -
                                                                                      spatial_limit["z_min"] + 1)
     return img_inverted_matrix, normalized_depth_img
+
+
+if __name__ == '__main__':
+    stl_file_path = "notebooks/character_3d_aligned/02801_mk30/stl/0.stl"
+    _, img = convert_pc_to_depth_map(stl_file_path, res=(512, 512, 255))
+    import matplotlib.pyplot as plt
+    plt.imshow(img, cmap='gray')
+    plt.show()

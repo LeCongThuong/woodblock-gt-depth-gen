@@ -44,9 +44,10 @@ def main():
         border_path = border_path_list[index]
         pc_surface_points = read_stl_file(surface_path)
         pc_woodblock_points = read_stl_file(woodblock_path)
-        tri_mesh_points = read_stl_file(border_path)
-        # [_, border_points] = get_point_from_via_file(border_path, keyword='whole')
-        border_points = get_border_points_from_triangle_mesh(tri_mesh_points)
+        # tri_mesh_points = read_stl_file(border_path)
+        [_, border_points] = get_point_from_via_file(border_path, keyword='whole')
+        border_points = np.hstack((border_points, np.zeros((border_points.shape[0], 1))))
+        # border_points = get_border_points_from_triangle_mesh(tri_mesh_points)
         pc_woodblock_points = raw_pitch_transform_3d_points(pc_surface_points, pc_woodblock_points, border_points)
         normalized_inverted_matrix, normalized_depth_img = convert_pc_to_depth_map(pc_woodblock_points)
 

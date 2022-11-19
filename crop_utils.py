@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 from tqdm.auto import tqdm
 from math import sqrt
-from model_transform_utils import get_surface_equation_coeffs
+from model_transform_utils import get_surface_equation_coeffs, get_rot_matrix_from_vectors
 from pointcloud_to_depth import convert_pc_to_depth_map
 import cv2
 from model_transform import raw_pitch_transform_3d_points
@@ -72,6 +72,7 @@ def get_all_normal_vectors(character_rect_bound_list, plane_coff_2):
     normal_vector_list = []
     for character_rect_bound in character_rect_bound_list:
         position_grid = get_position_grid(character_rect_bound)
+        # print(position_grid.shape)
         normal_vector = calculate_direction_normal_vector(plane_coff_2, position_grid)
         normal_vector_list.append(normal_vector)
     return normal_vector_list
@@ -90,42 +91,44 @@ def do_character_transform(np_pc_points, transform_matrix):
     homo_pc_3d = homo_pc_3d - mean_vector
     return homo_pc_3d
 
+#
+# def calc_u1(a, b, c):
+#     return b / sqrt(a * a + b * b)
+#
+#
+# def calc_u2(a, b, c):
+#     return -a / sqrt(a * a + b * b)
+#
+#
+# def calc_sin_phi(a, b, c):
+#     return sqrt((a * a + b * b) / (a * a + b * b + c * c))
+#
+#
+# def calc_cos_phi(a, b, c):
+#     return c / sqrt(a * a + b * b + c * c)
 
-def calc_u1(a, b, c):
-    return b / sqrt(a * a + b * b)
 
-
-def calc_u2(a, b, c):
-    return -a / sqrt(a * a + b * b)
-
-
-def calc_sin_phi(a, b, c):
-    return sqrt((a * a + b * b) / (a * a + b * b + c * c))
-
-
-def calc_cos_phi(a, b, c):
-    return c / sqrt(a * a + b * b + c * c)
-
-
-def get_rotation_matrix_of_character(normalized_vector):
-    a, b, c = normalized_vector
-    if c < 0:
-        a, b, c = -a, -b, -c
-    cos_phi = calc_cos_phi(a, b, c)
-    sin_phi = calc_sin_phi(a, b, c)
-    u1 = calc_u1(a, b, c)
-    u2 = calc_u2(a, b, c)
-    rot_matrix = np.array([
-        [cos_phi + u1 * u1 * (1 - cos_phi), u1 * u2 * (1 - cos_phi), u2 * sin_phi, 0],
-        [u1 * u2 * (1 - cos_phi), cos_phi + u2 * u2 * (1 - cos_phi), -u1 * sin_phi, 0],
-        [-u2 * sin_phi, u1 * sin_phi, cos_phi, 0],
-        [0, 0, 0, 1]])
+def get_rotation_matrix_of_character(normalized_vector, unit_vec=(0, 0, 1), do_upside=False):
+    # a, b, c = normalized_vector
+    if do_upside:
+        # a, b, c = -a, -b, -c
+        normalized_vector = - normalized_vector
+    rot_matrix = get_rot_matrix_from_vectors(normalized_vector, unit_vec)
+    # cos_phi = calc_cos_phi(a, b, c)
+    # sin_phi = calc_sin_phi(a, b, c)
+    # u1 = calc_u1(a, b, c)
+    # u2 = calc_u2(a, b, c)
+    # rot_matrix = np.array([
+    #     [cos_phi + u1 * u1 * (1 - cos_phi), u1 * u2 * (1 - cos_phi), u2 * sin_phi, 0],
+    #     [u1 * u2 * (1 - cos_phi), cos_phi + u2 * u2 * (1 - cos_phi), -u1 * sin_phi, 0],
+    #     [-u2 * sin_phi, u1 * sin_phi, cos_phi, 0],
+    #     [0, 0, 0, 1]])
     return rot_matrix
 
 
-def transform_characters(pc_points, normalized_vector):
+def transform_characters(pc_points, normalized_vector, do_upside=False):
     np_pc_points = np.asarray(pc_points.vertices)
-    transform_matrix = get_rotation_matrix_of_character(normalized_vector)
+    transform_matrix = get_rotation_matrix_of_character(normalized_vector, unit_vec=(0, 0, 1), do_upside=do_upside)
     homo_pc_3d = do_character_transform(np_pc_points, transform_matrix)
     pc_points.vertices = o3d.utility.Vector3dVector(homo_pc_3d)
     pc_points = o3d.geometry.TriangleMesh.compute_triangle_normals(pc_points)
@@ -133,15 +136,15 @@ def transform_characters(pc_points, normalized_vector):
     return pc_points
 
 
-def get_aligned_3d_characters(character_point_list, normal_vector_list):
+def get_aligned_3d_characters(character_point_list, normal_vector_list, do_upside=False):
     aligned_pc_point_list = []
     for index, character_point in enumerate(tqdm(character_point_list)):
-        pc_points = transform_characters(character_point, normal_vector_list[index])
+        pc_points = transform_characters(character_point, normal_vector_list[index], do_upside)
         aligned_pc_point_list.append(pc_points)
     return aligned_pc_point_list
 
 
-def crop_3d_characters(woodblock_points, woodblock_floor_points, character_surface_points, bboxes_2d_list, point_2d_list, point_depth_list, inverted_matrix, z_min_bound=-25, z_max_bound=25):
+def crop_3d_characters(woodblock_points, woodblock_floor_points, character_surface_points, bboxes_2d_list, point_2d_list, point_depth_list, raw_point_depth_list, inverted_matrix, z_min_bound=-25, z_max_bound=25):
     """
     Crop 3D characters from a whole woodblock. To do that:
     Firstly, get 3D points bounding boxes by mapping from 2D bboxes
@@ -149,7 +152,7 @@ def crop_3d_characters(woodblock_points, woodblock_floor_points, character_surfa
     Thirdly, get aligned characters:
         + Get 2-degree surface equation of woodblock
         + Get normal vectors of each character
-        +  Pitch and raw rotation to get aligned character
+        + Pitch and raw rotation to get aligned character
     :param woodblock_points: whole woodblock
     :param woodblock_floor_points: points on floor of woodblock
     :param character_surface_points: points on surface of characters
@@ -163,15 +166,26 @@ def crop_3d_characters(woodblock_points, woodblock_floor_points, character_surfa
     """
     bboxes_3d_list = get_3d_points_by_mapping_2d_3d_points(bboxes_2d_list, inverted_matrix, point_2d_list, point_depth_list)
     character_rect_bound_list = get_bboxes_bound(bboxes_3d_list, z_min_bound, z_max_bound)
-
-    character_surface_points = raw_pitch_transform_3d_points(woodblock_floor_points, character_surface_points, point_depth_list)
+    raw_point_depth_list = np.hstack((point_depth_list, np.zeros((raw_point_depth_list.shape[0], 1))))
+    character_surface_points = raw_pitch_transform_3d_points(woodblock_floor_points, character_surface_points, raw_point_depth_list)
     surface_2d_coeffs = get_surface_equation_coeffs(np.asarray(character_surface_points.vertices), order=2)
+    # print(surface_2d_coeffs)
     character_point_list = crop_polygon_3d_characters(woodblock_points, bboxes_3d_list, z_min_bound, z_max_bound)
+    # import os
+    # for w_index, d3_character in enumerate(character_point_list):
+    #     # d3_character = o3d.geometry.TriangleMesh.compute_triangle_normals(d3_character)
+    #     # d3_character.remove_duplicated_vertices()
+    #     o3d.io.write_triangle_mesh(
+    #         os.path.join('./temp_c_stl', f'{w_index}.stl'), d3_character)
 
     normal_vector_list = get_all_normal_vectors(character_rect_bound_list, surface_2d_coeffs)
-
-    aligned_3d_character_list = get_aligned_3d_characters(character_point_list, normal_vector_list)
-
+    do_upside = True if np.mean(np.asarray(normal_vector_list), axis=0)[2] < 0 else False
+    aligned_3d_character_list = get_aligned_3d_characters(character_point_list, normal_vector_list, do_upside=do_upside)
+    # normalized_aligned_3d_character_list = []
+    # for index, aligned_3d_character in aligned_3d_character_list:
+    #     aligned_3d_character = o3d.geometry.TriangleMesh.compute_triangle_normals(aligned_3d_character)
+    #     aligned_3d_character.remove_duplicated_vertices()
+    #     normalized_aligned_3d_character_list.append(aligned_3d_character)
     del character_point_list
     del normal_vector_list
     del character_rect_bound_list
