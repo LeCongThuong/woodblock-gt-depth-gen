@@ -34,7 +34,7 @@ def ray_tracing_depth_map(pc_mesh, side_range=(-12, 12), fwd_range=(-12, 12), re
     ratio_width = side_width / res[0]
     ratio_height = fwd_height / res[1]
     x_range = side_range[0] + np.arange(res[0]) * ratio_width
-    y_range = fwd_range[0] + np.arange(res[1]) * ratio_height
+    y_range = fwd_range[1] - np.arange(res[1]) * ratio_height
     x_mesh, y_mesh = np.meshgrid(x_range, y_range)
     x_mesh_flat = x_mesh.reshape((-1,))
     y_mesh_flat = y_mesh.reshape((-1,))
@@ -50,7 +50,7 @@ def ray_tracing_depth_map(pc_mesh, side_range=(-12, 12), fwd_range=(-12, 12), re
 
     z_min_depth = np.min(pixel_values)
     normalized_pixel_values = scale_to_z(pixel_values, z_min_depth, z_max_depth)
-    img_inverted_matrix = np.array([[ratio_width, 0, 0, side_range[0]], [0, ratio_height, 0, fwd_range[0]],
+    img_inverted_matrix = np.array([[ratio_width, 0, 0, side_range[0]], [0, -ratio_height, 0, fwd_range[1]],
                                     [0, 0, -max_z_distance / 254.0, z_max_camera], [0, 0, 0, 1]])
     return img_inverted_matrix, normalized_pixel_values
 

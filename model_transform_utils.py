@@ -8,24 +8,7 @@ import scipy.linalg
 
 def read_stl_file(pc_path):
     pc_points = o3d.io.read_triangle_mesh(str(pc_path), print_progress=True)
-    # np_pc_points = np.asarray(pc_points.vertices)
-    return pc_points  # , np_pc_points
-
-
-# def calc_sin_phi(a, b, c):
-#     return sqrt((a*a + b*b) / (a*a + b*b + c*c))
-#
-#
-# def calc_cos_phi(a, b, c):
-#     return c / sqrt(a*a + b*b + c*c)
-#
-#
-# def calc_u1(a, b, c):
-#     return b / sqrt(a*a + b*b)
-#
-#
-# def calc_u2(a, b, c):
-#     return -a / sqrt(a*a + b*b)
+    return pc_points
 
 
 def get_rot_matrix_from_vectors(vec1, vec2):
@@ -36,7 +19,6 @@ def get_rot_matrix_from_vectors(vec1, vec2):
     """
     a, b = (vec1 / np.linalg.norm(vec1)).reshape(3), (vec2 / np.linalg.norm(vec2)).reshape(3)
     v = np.cross(a, b)
-    print(a, b, v)
     if any(v):  # if not all zeros then
         c = np.dot(a, b)
         s = np.linalg.norm(v)
@@ -71,56 +53,11 @@ def get_oz_trans_matrix(surface_coeffs):
     return t_matrix
 
 
-# def get_rad(pivot_points, start_index_point=0, end_index_point=1, unit_vec=(1, 0)):
-#     start_points, end_points = pivot_points[start_index_point], pivot_points[end_index_point]
-#     woodblock_vec = end_points - start_points
-#     counterwise_lock_angle = get_angle_between_two_vectors(unit_vec, woodblock_vec)
-#     return counterwise_lock_angle
-
-#
-# def get_angle_between_two_vectors(vec_1, vec_2):
-#     counterwise_lock_angle = np.arctan2(vec_1[0] * vec_2[1] - vec_1[1] * vec_2[0],
-#                                          vec_1[0] * vec_2[0] + vec_1[1] * vec_2[1])
-#     return counterwise_lock_angle
-
-
 def get_yaw_rot_matrix(border_points, unit_vec=(1, 0, 0)):
-    # rot_rad = get_rad(border_points, start_index_point, end_index_point, unit_vec=unit_vec)
-
-    # yaw_matrix = np.asarray([[math.cos(rot_rad), -math.sin(rot_rad), 0, 0],
-    #                          [math.sin(rot_rad), math.cos(rot_rad), 0, 0],
-    #                          [0, 0, 1, 0],
-    #                          [0, 0, 0, 1]])
-    horizontal_vec = border_points[1] - border_points[0]  # if flip_vec else border_points[0] - border_points[1]
-    horizontal_vec[2] = 0
+    horizontal_vec = border_points[1] - border_points[0]
     unit_vec = np.asarray(unit_vec)
     yaw_matrix = get_pitch_rot_matrix(horizontal_vec, unit_vec)
     return yaw_matrix
-
-
-def get_3d_transform_matrix(surface_coeffs, border_point=None):
-    """
-    Get the translation matrix such that the 3D object can "lie" on Oxy (the surface of 3D object is Oxy).
-    If border_point not None, rotate 3D object such that upper width vector is same direction as vector (1, 0) in the Oxy plane
-    To do that:
-        Firtly, lift 3D object to 3D surface intersect with Oz at the (0, 0, 0) point
-        Secondly, rotate 3D object around a vector that is the cross product of normal vector of 3D surface and vector (0, 0, 1)
-        Thirdly, rotate 3D object such that upper width vector is same direction as vector (1, 0) in the Oxy plane
-    :param surface_coeffs: coefficient of 3D object surface
-    :param border_point: 4 corner points (2D) of 3D object, 4 points (2D) around fish-tail
-    :return: homo transform matrix (4x4)
-    """
-    normal_vector = surface_coeffs[:3]
-    pitch_matrix = get_pitch_rot_matrix(normal_vector)
-    # print(rot_matrix)
-    oz_trans_matrix = get_oz_trans_matrix(surface_coeffs)
-    # print(trans_matrix)
-    transform_matrix = np.matmul(pitch_matrix, oz_trans_matrix)
-    if border_point is not None:
-        yaw_matrix = get_yaw_rot_matrix(border_point)
-        print(yaw_matrix)
-        transform_matrix = np.matmul(yaw_matrix, transform_matrix)
-    return transform_matrix
 
 
 def _transform_homo_points(np_points, transform_matrix):
@@ -131,20 +68,49 @@ def _transform_homo_points(np_points, transform_matrix):
     return homo_np_3d
 
 
-def transform_points(np_pc_points, transform_matrix):
+def get_3d_transform_matrix(surface_coeffs, border_point=None):
+    """
+    Get the translation matrix such that the 3D object can "lie" on Oxy (the surface of 3D object is Oxy).
+    If border_point not None, rotate 3D object such that upper width vector is same direction as vector (1, 0)
+    in the Oxy plane.
+    To do that:
+        Firtly, lift 3D object to 3D surface intersect with Oz at the (0, 0, 0) point
+        Secondly, rotate 3D object around a vector that is the cross product of normal vector of 3D surface and vector
+        (0, 0, 1)
+        Thirdly, rotate 3D object such that upper width vector is same direction as vector (1, 0) in the Oxy plane
+    :param surface_coeffs: coefficient of 3D object surface
+    :param border_point: 2 border points of the horizontal line
+    :return: homo transform matrix (4x4)
+    """
+    normal_vector = surface_coeffs[:3]
+    pitch_matrix = get_pitch_rot_matrix(normal_vector)
+    # print(rot_matrix)
+    oz_trans_matrix = get_oz_trans_matrix(surface_coeffs)
+    # print(trans_matrix)
+    transform_matrix = np.matmul(pitch_matrix, oz_trans_matrix)
+    if border_point is not None:
+        border_point = _transform_homo_points(border_point, transform_matrix)
+        border_point[:, 2] = 0
+        yaw_matrix = get_yaw_rot_matrix(border_point)
+        transform_matrix = np.matmul(yaw_matrix, transform_matrix)
+    return transform_matrix
+
+
+def transform_points(np_pc_points, transform_matrix, mirror=False):
     """
     Transform 3D points with transform matrix.
     Converting pc_points into homo points and then transform.
     Turn upside if woodblock point surface is downside
     :param np_pc_points: (x, y, z)
     :param transform_matrix: 4x4 matrix
+    :param mirror: boolean: mirror Oxy or not, mirror Oyz or not
     :return:homo_pc_3d: (x, y, z) not (x, y, z, 1)
     """
     homo_pc_3d = _transform_homo_points(np_pc_points, transform_matrix)
-    # if upside:
-    #     # upsiding if front face is downside
-    #     homo_pc_3d[:, 2] = - homo_pc_3d[:, 2]
-    #     homo_pc_3d[:, 0] = - homo_pc_3d[:, 0]
+    if mirror:
+        # upfront if front face is downside
+        homo_pc_3d[:, 2] = - homo_pc_3d[:, 2]
+        homo_pc_3d[:, 0] = - homo_pc_3d[:, 0]
 
     # mean_vector = np.mean(homo_pc_3d, axis=0)
     # mean_vector[2] = 0
@@ -168,37 +134,6 @@ def preprocess_pc(woodblock_points, surface_points, floor_points, upside=True):
     surface_points.vertices = o3d.utility.Vector3dVector(np.asarray(surface_points.vertices) - mean_vector)
     floor_points.vertices = o3d.utility.Vector3dVector(np.asarray(floor_points.vertices) - mean_vector)
     return _recalculate_norm(woodblock_points), _recalculate_norm(surface_points), _recalculate_norm(floor_points)
-
-
-# def transform_upside_points(np_pc_points, np_surface_points, np_floor_points, transform_matrix, upside=False):
-#     """
-#     Transform 3D points with transform matrix.
-#     Converting pc_points into homo points and then transform.
-#     Turn upside if woodblock point surface is downside
-#     :param np_pc_points: (x, y, z)
-#     :param transform_matrix: 4x4 matrix
-#     :return:homo_pc_3d: (x, y, z) not (x, y, z, 1)
-#     """
-#
-#     homo_pc_3d = _transform_homo_points(np_pc_points, transform_matrix)
-#     np_surface_points = _transform_homo_points(np_surface_points)
-#     np_floor_points = _transform_homo_points(np_floor_points)
-#     mean_vector = np.mean(homo_pc_3d, axis=0)
-#     if upside:
-#         # upsiding if front face is downside
-#         homo_pc_3d[:, 2] = - homo_pc_3d[:, 2]
-#         homo_pc_3d[:, 0] = - homo_pc_3d[:, 0]
-#         np_surface_points[:, 2] = - np_surface_points[:, 2]
-#         np_surface_points[:, 0] = - np_surface_points[:, 0]
-#         np_floor_points[:, 2] = - np_floor_points[:, 2]
-#         np_floor_points[:, 0] = - np_floor_points[:, 0]
-#         mean_vector = np.mean(homo_pc_3d, axis=0)
-#
-#     mean_vector[2] = 0
-#     homo_pc_3d = homo_pc_3d - mean_vector
-#     np_floor_points = np_floor_points - mean_vector
-#     np_surface_points = np_surface_points - mean_vector
-#     return homo_pc_3d, np_floor_points, np_surface_points
 
 
 def upflip_3d_points(pc_points):
@@ -233,12 +168,14 @@ def get_surface_equation_coeffs(data, order=2):
         return [C[0], C[1], C[2], -1, C[3], C[4], C[5]]
 
 
-def get_border_points_from_triangle_mesh(border_tri_mesh):
+def get_border_points_from_triangle_mesh(border_tri_mesh, order=True):
     np_tri_mesh = np.asarray(border_tri_mesh.triangles)
     np_3d_points = np.asarray(border_tri_mesh.vertices)
     border_points = []
-    for i in range(np_tri_mesh.shape[0]):
-        mean_point = np.mean(np_3d_points[np_tri_mesh[i], :], axis=0).tolist()
+    num_border_mesh = np_tri_mesh.shape[0]
+    for i in range(num_border_mesh):
+        mean_point = np.mean(np_3d_points[np_tri_mesh[i if order else num_border_mesh - i - 1], :], axis=0).tolist()
+        mean_point[2] = 0
         border_points.append(mean_point)
     border_points = np.asarray(border_points)
     return border_points

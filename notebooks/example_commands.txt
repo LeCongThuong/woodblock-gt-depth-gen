@@ -22,8 +22,15 @@ python3 process_pitching_yaw_transform.py -woodblock "notebooks/woodblock_z/whol
 
 
 
-python3 process_pitching_transform.py -woodblock "notebooks/whole_woodblock/whole_02801_mk29.stl" -surface "notebooks/surface_woodblock_points/surface_02801_mk29.stl" -floor "notebooks/floor_woodblock_points/floor_02801_mk29.stl" -depth_dest "notebooks/woodblock_depth_z" --upside
+python3 process_pitching_transform.py -woodblock "notebooks/whole_woodblock/whole_02801_mk29.stl" -floor "notebooks/floor_woodblock_points/floor_02801_mk29.stl" -depth_dest "notebooks/woodblock_depth_z" --mirror
 
 python3 process_pitching_yaw_transform.py -woodblock "notebooks/woodblock_z/02801_mk29_z.stl" -surface "notebooks/floor_z/02801_mk29_z.stl" -border "notebooks/raw_pitch_map/pitch_map_02801_mk30.json" -woodblock_dest "notebooks/woodblock_xyz" -depth_dest "notebooks/woodblock_depth_xyz" -inverted_matrix "notebooks/woodblock_inverted_matrix"
 
 python3 process_pitching_transform.py -woodblock "notebooks/woodblock_z/02801_mk29_z.stl" -surface "notebooks/surface_z/02801_mk29_z.stl" -floor "notebooks/floor_z/02801_mk29_z.stl" -depth_dest "notebooks/woodblock_depth_z" --upside
+
+python3 process_pitching_yaw_transform.py -woodblock "notebooks/whole_woodblock/whole_02801_mk29.stl" -floor "notebooks/floor_woodblock_points/floor_02801_mk29.stl" -border "notebooks/woodblock_border/border_02801_mk29.stl" -woodblock_dest "notebooks/woodblock_xyz" -depth_dest "notebooks/woodblock_depth_xyz" -inverted_matrix "notebooks/woodblock_inverted_matrix" --mirror
+
+
+python3 process_pitching_yaw_transform.py -woodblock "notebooks/whole_woodblock/whole_02801_mk30.stl" -floor "notebooks/floor_woodblock_points/floor_02801_mk30.stl" -border "notebooks/woodblock_border/border_02801_mk30.stl" -woodblock_dest "notebooks/woodblock_xyz" -depth_dest "notebooks/woodblock_depth_xyz" -inverted_matrix "notebooks/woodblock_inverted_matrix"
+
+python3 process_pitching_transform.py -woodblock "notebooks/whole_woodblock/whole_02801_mk30.stl" -floor "notebooks/floor_woodblock_points/floor_02801_mk30.stl" -depth_dest "notebooks/woodblock_depth_z"

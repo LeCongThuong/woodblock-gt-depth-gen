@@ -144,7 +144,9 @@ def get_aligned_3d_characters(character_point_list, normal_vector_list, do_upsid
     return aligned_pc_point_list
 
 
-def crop_3d_characters(woodblock_points, woodblock_floor_points, character_surface_points, bboxes_2d_list, point_2d_list, point_depth_list, raw_point_depth_list, inverted_matrix, z_min_bound=-25, z_max_bound=25):
+def crop_3d_characters(woodblock_points, woodblock_floor_points, character_surface_points, bboxes_2d_list,
+                       point_2d_list, point_depth_list, border_points, inverted_matrix, mirror=False, z_min_bound=-25,
+                       z_max_bound=25):
     """
     Crop 3D characters from a whole woodblock. To do that:
     Firstly, get 3D points bounding boxes by mapping from 2D bboxes
@@ -159,33 +161,27 @@ def crop_3d_characters(woodblock_points, woodblock_floor_points, character_surfa
     :param bboxes_2d_list: bounding boxes on 2D scan images
     :param point_2d_list:  registered points on 2D scan images
     :param point_depth_list: registered points on depth images
+    :param border_points: border points of horizontal line of woodblock
     :param inverted_matrix: matrix to get back points on 3D model from points on depth map
+    :param mirror: flip Oxy and flip Oyz or not
     :param z_min_bound: min bounding of z axis
     :param z_max_bound: max bounding of z axis
     :return: 3D aligned mesh of all 3D characters
     """
-    bboxes_3d_list = get_3d_points_by_mapping_2d_3d_points(bboxes_2d_list, inverted_matrix, point_2d_list, point_depth_list)
+    bboxes_3d_list = get_3d_points_by_mapping_2d_3d_points(bboxes_2d_list,
+                                                           inverted_matrix,
+                                                           point_2d_list,
+                                                           point_depth_list)
     character_rect_bound_list = get_bboxes_bound(bboxes_3d_list, z_min_bound, z_max_bound)
-    raw_point_depth_list = np.hstack((point_depth_list, np.zeros((raw_point_depth_list.shape[0], 1))))
-    character_surface_points = raw_pitch_transform_3d_points(woodblock_floor_points, character_surface_points, raw_point_depth_list)
+    character_surface_points = raw_pitch_transform_3d_points(woodblock_floor_points, character_surface_points,
+                                                             border_points, mirror)
     surface_2d_coeffs = get_surface_equation_coeffs(np.asarray(character_surface_points.vertices), order=2)
-    # print(surface_2d_coeffs)
     character_point_list = crop_polygon_3d_characters(woodblock_points, bboxes_3d_list, z_min_bound, z_max_bound)
-    # import os
-    # for w_index, d3_character in enumerate(character_point_list):
-    #     # d3_character = o3d.geometry.TriangleMesh.compute_triangle_normals(d3_character)
-    #     # d3_character.remove_duplicated_vertices()
-    #     o3d.io.write_triangle_mesh(
-    #         os.path.join('./temp_c_stl', f'{w_index}.stl'), d3_character)
 
     normal_vector_list = get_all_normal_vectors(character_rect_bound_list, surface_2d_coeffs)
     do_upside = True if np.mean(np.asarray(normal_vector_list), axis=0)[2] < 0 else False
     aligned_3d_character_list = get_aligned_3d_characters(character_point_list, normal_vector_list, do_upside=do_upside)
-    # normalized_aligned_3d_character_list = []
-    # for index, aligned_3d_character in aligned_3d_character_list:
-    #     aligned_3d_character = o3d.geometry.TriangleMesh.compute_triangle_normals(aligned_3d_character)
-    #     aligned_3d_character.remove_duplicated_vertices()
-    #     normalized_aligned_3d_character_list.append(aligned_3d_character)
+
     del character_point_list
     del normal_vector_list
     del character_rect_bound_list

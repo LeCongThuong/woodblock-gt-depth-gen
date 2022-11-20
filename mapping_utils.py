@@ -25,6 +25,18 @@ def mapping_depth_point_to_3d_point(depth_poly_list, inverted_matrix):
     return woodblock_3d_points_list
 
 
+def flip_boxes_horizontal(np_bbox_list, image_width=12000):
+    """
+    Flip annotation
+    """
+    flip_bbox_list = []
+    for np_bbox in np_bbox_list:
+        np_bbox[:, 0] = image_width - 1 - np_bbox[:, 0]
+        flip_bbox_list.append(np_bbox)
+    del np_bbox_list
+    return flip_bbox_list
+
+
 def get_3d_points_by_mapping_2d_3d_points(bboxes_2d_list, inverted_matrix, point_2d_list, point_depth_list):
     """
     Mapping bounding boxes of 2D scan to bounding boxes of 3D model. Firstly, mapping bboxes 2d list of 2D scan to
@@ -37,7 +49,8 @@ def get_3d_points_by_mapping_2d_3d_points(bboxes_2d_list, inverted_matrix, point
     :return:
     """
     bboxes_depth_list = mapping(bboxes_2d_list, point_2d_list, point_depth_list)
-    points_3d_list = mapping_depth_point_to_3d_point(bboxes_depth_list, inverted_matrix)
+    flip_bboxes_depth_list = flip_boxes_horizontal(bboxes_depth_list)
+    points_3d_list = mapping_depth_point_to_3d_point(flip_bboxes_depth_list, inverted_matrix)
     return points_3d_list
 
 
