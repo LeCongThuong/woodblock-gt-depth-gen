@@ -6,8 +6,7 @@ from model_transform_utils import read_stl_file
 import cv2
 from tqdm.auto import tqdm
 import gc
-import open3d as o3d
-from model_transform_utils import preprocess_pc
+import numpy as np
 
 
 def parse_aug():
@@ -16,6 +15,7 @@ def parse_aug():
     parser.add_argument('-floor', '--floor_path', help='path to the floor of woodblock dir/file')
     parser.add_argument("-mirror", "--mirror", action="store_true", help='mirror Oz and Ox')
     parser.add_argument('-depth_dest', '--depth_dest', help='path to the directory to save the depth map result')
+    parser.add_argument('-inverted_matrix', '--inverted_matrix_path', help='path to inverted matrix dir to save')
     args = parser.parse_args()
     return args
 
@@ -38,20 +38,22 @@ def main():
     assert len(woodblock_path_list) == len(floor_path_list), \
         f"Num files of woodblock: {woodblock_path_list} is not equal to num file of surface: {floor_path_list}"
     for index, woodblock_path in tqdm(enumerate(woodblock_path_list)):
-        # try:
-        floor_path = floor_path_list[index]
-        pc_floor_points = read_stl_file(floor_path)
-        pc_woodblock_points = read_stl_file(woodblock_path)
-        pc_woodblock_points = pitch_transform_3d_points(pc_floor_points, pc_woodblock_points, args.mirror)
+        try:
+            floor_path = floor_path_list[index]
+            pc_floor_points = read_stl_file(floor_path)
+            pc_woodblock_points = read_stl_file(woodblock_path)
+            pc_woodblock_points = pitch_transform_3d_points(pc_floor_points, pc_woodblock_points, args.mirror)
 
-        _, normalized_depth_img = convert_pc_to_depth_map(pc_woodblock_points)
-        cv2.imwrite(str(Path(args.depth_dest) / f'{woodblock_path.stem}_z.png'), normalized_depth_img)
-        del pc_woodblock_points
-        del normalized_depth_img
-        gc.collect()
-        # except Exception as e:
-        #     print(e)
-        #     print(woodblock_path.name)
+            normalized_inverted_matrix, normalized_depth_img = convert_pc_to_depth_map(pc_woodblock_points)
+            with open(str(Path(args.inverted_matrix_path) / f'{woodblock_path.stem}_z.npy'), 'wb') as f:
+                np.save(f, normalized_inverted_matrix)
+            cv2.imwrite(str(Path(args.depth_dest) / f'{woodblock_path.stem}_z.png'), normalized_depth_img)
+            del pc_woodblock_points
+            del normalized_depth_img
+            gc.collect()
+        except Exception as e:
+            print("Error: ", e)
+            print(woodblock_path.name)
 
 
 if __name__ == '__main__':

@@ -37,20 +37,19 @@ def flip_boxes_horizontal(np_bbox_list, image_width=12000):
     return flip_bbox_list
 
 
-def get_3d_points_by_mapping_2d_3d_points(bboxes_2d_list, inverted_matrix, point_2d_list, point_depth_list):
+def get_3d_points_by_mapping_2d_3d_points(bboxes_2d_list, aligned_matrix, point_2d_list, point_depth_list):
     """
     Mapping bounding boxes of 2D scan to bounding boxes of 3D model. Firstly, mapping bboxes 2d list of 2D scan to
     depth map image by using registered points (point_2d_list, point_depth_list). Secondly, mapping the bboxes of depth
     map images to 3D by using inverted_matrix
     :param bboxes_2d_list: bboxes 2d of scan images
-    :param inverted_matrix: matrix that can be used to get points of 3D from points of depth map
+    :param aligned_matrix: matrix that can be used to get points of 3D from points of depth map
     :param point_2d_list: registered 2d points
     :param point_depth_list: registered depth points
     :return:
     """
     bboxes_depth_list = mapping(bboxes_2d_list, point_2d_list, point_depth_list)
-    flip_bboxes_depth_list = flip_boxes_horizontal(bboxes_depth_list)
-    points_3d_list = mapping_depth_point_to_3d_point(flip_bboxes_depth_list, inverted_matrix)
+    points_3d_list = mapping_depth_point_to_3d_point(bboxes_depth_list, aligned_matrix)
     return points_3d_list
 
 

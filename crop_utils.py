@@ -144,8 +144,8 @@ def get_aligned_3d_characters(character_point_list, normal_vector_list, do_upsid
     return aligned_pc_point_list
 
 
-def crop_3d_characters(woodblock_points, woodblock_floor_points, character_surface_points, bboxes_2d_list,
-                       point_2d_list, point_depth_list, border_points, inverted_matrix, mirror=False, z_min_bound=-25,
+def crop_3d_characters(woodblock_points, surface_points, bboxes_2d_list,
+                       point_2d_list, point_depth_list, inverted_matrix, z_min_bound=-25,
                        z_max_bound=25):
     """
     Crop 3D characters from a whole woodblock. To do that:
@@ -173,9 +173,7 @@ def crop_3d_characters(woodblock_points, woodblock_floor_points, character_surfa
                                                            point_2d_list,
                                                            point_depth_list)
     character_rect_bound_list = get_bboxes_bound(bboxes_3d_list, z_min_bound, z_max_bound)
-    character_surface_points = raw_pitch_transform_3d_points(woodblock_floor_points, character_surface_points,
-                                                             border_points, mirror)
-    surface_2d_coeffs = get_surface_equation_coeffs(np.asarray(character_surface_points.vertices), order=2)
+    surface_2d_coeffs = get_surface_equation_coeffs(np.asarray(surface_points.vertices), order=2)
     character_point_list = crop_polygon_3d_characters(woodblock_points, bboxes_3d_list, z_min_bound, z_max_bound)
 
     normal_vector_list = get_all_normal_vectors(character_rect_bound_list, surface_2d_coeffs)

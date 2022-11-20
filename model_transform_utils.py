@@ -68,7 +68,7 @@ def _transform_homo_points(np_points, transform_matrix):
     return homo_np_3d
 
 
-def get_3d_transform_matrix(surface_coeffs, border_point=None):
+def get_3d_transform_matrix(surface_coeffs, border_point=None, matrix_z=None):
     """
     Get the translation matrix such that the 3D object can "lie" on Oxy (the surface of 3D object is Oxy).
     If border_point not None, rotate 3D object such that upper width vector is same direction as vector (1, 0)
@@ -79,7 +79,8 @@ def get_3d_transform_matrix(surface_coeffs, border_point=None):
         (0, 0, 1)
         Thirdly, rotate 3D object such that upper width vector is same direction as vector (1, 0) in the Oxy plane
     :param surface_coeffs: coefficient of 3D object surface
-    :param border_point: 2 border points of the horizontal line
+    :param border_point: 2 depth border points of the horizontal line
+    :param matrix_z: convert border_point to 3D point
     :return: homo transform matrix (4x4)
     """
     normal_vector = surface_coeffs[:3]
@@ -89,7 +90,7 @@ def get_3d_transform_matrix(surface_coeffs, border_point=None):
     # print(trans_matrix)
     transform_matrix = np.matmul(pitch_matrix, oz_trans_matrix)
     if border_point is not None:
-        border_point = _transform_homo_points(border_point, transform_matrix)
+        border_point = _transform_homo_points(border_point, matrix_z)
         border_point[:, 2] = 0
         yaw_matrix = get_yaw_rot_matrix(border_point)
         transform_matrix = np.matmul(yaw_matrix, transform_matrix)
@@ -112,6 +113,7 @@ def transform_points(np_pc_points, transform_matrix, mirror=False):
         homo_pc_3d[:, 2] = - homo_pc_3d[:, 2]
         homo_pc_3d[:, 0] = - homo_pc_3d[:, 0]
 
+    homo_pc_3d[:, 0] = - homo_pc_3d[:, 0]  # to similar to 2D scan images
     # mean_vector = np.mean(homo_pc_3d, axis=0)
     # mean_vector[2] = 0
     # homo_pc_3d = homo_pc_3d - mean_vector

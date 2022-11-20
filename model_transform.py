@@ -4,15 +4,21 @@ from model_transform_utils import get_surface_equation_coeffs, get_3d_transform_
 from pathlib import Path
 
 
-def raw_pitch_transform_3d_points(pc_woodblock_points, pc_floor_points, np_border_points, mirror=False):
+def raw_pitch_transform_3d_points(pc_woodblock_points, pc_surface_points, pc_floor_points, np_border_points, matrix_z, mirror=False):
     surface_coeffs = get_surface_equation_coeffs(np.asarray(pc_floor_points.vertices), order=1)
-    transform_matrix = get_3d_transform_matrix(surface_coeffs, np_border_points)
+    transform_matrix = get_3d_transform_matrix(surface_coeffs, np_border_points, matrix_z)
     pc_woodblock_points.vertices = o3d.utility.Vector3dVector(transform_points(np.asarray(pc_woodblock_points.vertices),
+                                                                               transform_matrix,
+                                                                               mirror))
+    pc_surface_points.vertices = o3d.utility.Vector3dVector(transform_points(np.asarray(pc_surface_points.vertices),
                                                                                transform_matrix,
                                                                                mirror))
     pc_woodblock_points = o3d.geometry.TriangleMesh.compute_triangle_normals(pc_woodblock_points)
     pc_woodblock_points.remove_duplicated_vertices()
-    return pc_woodblock_points
+
+    pc_surface_points = o3d.geometry.TriangleMesh.compute_triangle_normals(pc_surface_points)
+    pc_surface_points.remove_duplicated_vertices()
+    return pc_woodblock_points, pc_surface_points
 
 
 def pitch_transform_3d_points(pc_floor_points, pc_woodblock_points, mirror=False):
