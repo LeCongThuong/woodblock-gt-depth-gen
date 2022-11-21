@@ -120,34 +120,6 @@ def transform_points(np_pc_points, transform_matrix, mirror=False):
     return homo_pc_3d
 
 
-def preprocess_pc(woodblock_points, surface_points, floor_points, upside=True):
-    def _recalculate_norm(pc_points):
-        np_points = np.asarray(pc_points.vertices)
-        pc_points.vertices = o3d.utility.Vector3dVector(np_points)
-        pc_points = o3d.geometry.TriangleMesh.compute_triangle_normals(pc_points)
-        pc_points.remove_duplicated_vertices()
-        return pc_points
-    if upside:
-        woodblock_points = upflip_3d_points(woodblock_points)
-        surface_points = upflip_3d_points(surface_points)
-        floor_points = upflip_3d_points(floor_points)
-    mean_vector = np.mean(np.asarray(woodblock_points.vertices), axis=0)
-    woodblock_points.vertices = o3d.utility.Vector3dVector(np.asarray(woodblock_points.vertices) - mean_vector)
-    surface_points.vertices = o3d.utility.Vector3dVector(np.asarray(surface_points.vertices) - mean_vector)
-    floor_points.vertices = o3d.utility.Vector3dVector(np.asarray(floor_points.vertices) - mean_vector)
-    return _recalculate_norm(woodblock_points), _recalculate_norm(surface_points), _recalculate_norm(floor_points)
-
-
-def upflip_3d_points(pc_points):
-    np_points = np.asarray(pc_points.vertices)
-    np_points[:, 2] = - np_points[:, 2]
-    np_points[:, 0] = - np_points[:, 0]
-    pc_points.vertices = o3d.utility.Vector3dVector(np_points)
-    pc_points = o3d.geometry.TriangleMesh.compute_triangle_normals(pc_points)
-    pc_points.remove_duplicated_vertices()
-    return pc_points
-
-
 def get_rotation_points(poly_points, M):
     homo_poly_points = np.column_stack((poly_points, np.ones((len(poly_points), 1))))
     transform_poly_points = np.dot(M, homo_poly_points.T)

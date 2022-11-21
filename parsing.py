@@ -35,6 +35,17 @@ def get_point_from_via_file(via_json_path, keyword='whole'):
     return [np_src_point_list, np_dest_point_list]
 
 
+def get_border_points_from_via_file(via_json_path, key_src='depth_z'):
+    anno = read_json_file(via_json_path)
+    depth_point_list = []
+    for anno_key in anno.keys():
+        if key_src in anno_key:
+            for point_info in anno[anno_key]['regions']:
+                depth_point_list.append([point_info['shape_attributes']['cx'], point_info['shape_attributes']['cy']])
+    np_depth_point_list = np.asarray(depth_point_list)
+    return np_depth_point_list
+
+
 def parse_bboxes_list_from_sino_nom_anno_file(sino_nom_file):
     anno_info = read_json_file(sino_nom_file)
     bboxes_info = anno_info["bboxes"]
