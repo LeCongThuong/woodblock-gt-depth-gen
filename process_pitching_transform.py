@@ -47,7 +47,7 @@ def main():
             normalized_inverted_matrix, normalized_depth_img = convert_pc_to_depth_map(pc_woodblock_points)
             with open(str(Path(args.inverted_matrix_path) / f'{woodblock_path.stem}_z.npy'), 'wb') as f:
                 np.save(f, normalized_inverted_matrix)
-            cv2.imwrite(str(Path(args.depth_dest) / f'{woodblock_path.stem}_z.png'), normalized_depth_img)
+            cv2.imwrite(str(Path(args.depth_dest) / f'{"_".join(woodblock_path.stem.split("_")[:1])}_z.png'), normalized_depth_img)
             del pc_woodblock_points
             del normalized_depth_img
             gc.collect()

@@ -4,7 +4,7 @@ from parsing import get_point_from_via_file, parse_bboxes_list_from_sino_nom_ann
 import argparse
 import os
 import cv2
-from config import args
+# from config import args
 
 
 def parse_aug():
@@ -21,14 +21,12 @@ def parse_aug():
 
     parser.add_argument('-character_dest', '--character_dest',
                         help='path to the directory to save the aligned character result')
-
-    parser.add_argument("-mirror", "--mirror", action="store_true", help='mirror Oz and Ox')
-    parser.add_argument("-order", "--order_border", action="store_true", help='swap border points')
     args = parser.parse_args()
     return args
 
 
 if __name__ == '__main__':
+    args = parse_aug()
     Path(os.path.join(args.character_dest, Path(args.sina_nom_anno).stem, 'stl')).mkdir(parents=True, exist_ok=True)
     Path(os.path.join(args.character_dest, Path(args.sina_nom_anno).stem, 'depth')).mkdir(parents=True, exist_ok=True)
     Path(os.path.join(args.character_dest, Path(args.sina_nom_anno).stem, 'print')).mkdir(parents=True, exist_ok=True)

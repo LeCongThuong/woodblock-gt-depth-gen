@@ -1,38 +1,9 @@
-Rotate 3D image
-python3 process_pitching_yaw_transform.py -woodblock "notebooks/whole_woodblock/whole_02801_mk29.stl" -surface "notebooks/floor_woodblock_points/floor_02801_mk29.stl" -border "notebooks/raw_pitch_map/pitch_map_02801_mk29.json" -woodblock_dest "notebooks/woodblock_xyz" -depth_dest "notebooks/woodblock_depth_xyz" -inverted_matrix "notebooks/woodblock_inverted_matrix"
+Do the pitching transform process to get depth map:
+python3 process_pitching_transform.py -woodblock "notebooks/whole_woodblock/whole_02801_mk29.stl" -floor "notebooks/floor_woodblock_points/floor_02801_mk29.stl" -depth_dest "notebooks/woodblock_depth_z" --inverted_matrix "notebooks/inverted_matrix_z" --mirror
 
-python3 process_pitching_transform.py -woodblock "notebooks/whole_woodblock/whole_02801_mk29.stl" -surface "notebooks/surface_woodblock_points/surface_02801_mk29.stl" -floor "notebooks/floor_woodblock_points/floor_02801_mk29.stl" -depth_dest "notebooks/woodblock_depth_z"
+Do the pitching and rawing transform process to get aligned 3D model and aligned depth map:
 
-python3 process_pitching_yaw_transform.py -woodblock "notebooks/test_moc_ban_ok/whole_02801_mk30.stl" -surface "notebooks/test_moc_ban_ok/floor_02801_mk30.stl" -border "notebooks/raw_pitch_map/pitch_map_02801_mk30.json" -woodblock_dest "notebooks/woodblock_xyz" -depth_dest "notebooks/woodblock_depth_xyz" -inverted_matrix "notebooks/woodblock_inverted_matrix"
+python3 process_pitching_yaw_transform.py -woodblock "notebooks/whole_woodblock/whole_02801_mk29.stl" -surface "notebooks/surface_woodblock_points/surface_02801_mk29.stl" -floor "notebooks/floor_woodblock_points/floor_02801_mk29.stl" -border "notebooks/depth_border_points/whole_02801_mk29.json" -matrix_z "notebooks/inverted_matrix_z/whole_02801_mk29_z.npy" -woodblock_dest "notebooks/woodblock_xyz" -depth_dest "notebooks/woodblock_depth_xyz" -inverted_matrix "notebooks/inverted_matrix_xyz/" -surface_xyz "notebooks/surface_xyz" --mirror
 
-
-python3 process_pitching_yaw_transform.py -woodblock "notebooks/test_moc_ban_ok/whole_02843_mk7.stl" -surface "notebooks/test_moc_ban_ok/floor_02843_mk7.stl" -border "notebooks/raw_pitch_map/pitch_map_02801_mk30.json" -woodblock_dest "notebooks/woodblock_xyz" -depth_dest "notebooks/woodblock_depth_xyz" -inverted_matrix "notebooks/woodblock_inverted_matrix"
-
-
-
-Get aligned 3D character 
-python3 cropping.py -woodblock "notebooks/woodblock_xyz/whole_02801_mk30_xyz.stl" -character_surface "notebooks/test_moc_ban_ok/surface_02801_mk30.stl" -floor "notebooks/test_moc_ban_ok/floor_02801_mk30.stl" -pitch_map "notebooks/pitch_map/pitch_map_02801_mk30.json" -sina_nom_anno "notebooks/sina_nom_annos/02801_mk30.json" -inverted_matrix "notebooks/woodblock_inverted_matrix/whole_02801_mk30_xyz.npy" -character_dest "notebooks/character_3d_aligned" -scan_img "notebooks/scan_imgs/02801_mk30.jpg"
-
-python3 cropping.py -woodblock "notebooks/test_moc_ban_ok/whole_02801_mk30.stl" -character_surface "notebooks/test_moc_ban_ok/surface_02801_mk30.stl" -floor "notebooks/test_moc_ban_ok/floor_02801_mk30.stl" -pitch_map "notebooks/pitch_map/pitch_map_02801_mk30.json" -sina_nom_anno "notebooks/sina_nom_annos/02801_mk30.json" -inverted_matrix "notebooks/woodblock_inverted_matrix/whole_02801_mk30_xyz.npy" -character_dest "notebooks/character_3d_aligned" -scan_img "notebooks/scan_imgs/02801_mk30.jpg"
-
-
-python3 process_pitching_transform.py -woodblock "notebooks/whole_woodblock/whole_02801_mk29.stl" -surface "notebooks/surface_woodblock_points/surface_02801_mk29.stl" -floor "notebooks/floor_woodblock_points/floor_02801_mk29.stl" -depth_dest "notebooks/woodblock_depth_z" --upside
-
-python3 process_pitching_yaw_transform.py -woodblock "notebooks/woodblock_z/whole_02801_mk29_z.stl" -surface "notebooks/floor_z/floor_02801_mk29_z.stl" -border "notebooks/raw_pitch_map/pitch_map_02801_mk30.json" -woodblock_dest "notebooks/woodblock_xyz" -depth_dest "notebooks/woodblock_depth_xyz" -inverted_matrix "notebooks/woodblock_inverted_matrix"
-
-
-
-python3 process_pitching_transform.py -woodblock "notebooks/whole_woodblock/whole_02801_mk29.stl" -floor "notebooks/floor_woodblock_points/floor_02801_mk29.stl" -depth_dest "notebooks/woodblock_depth_z" --mirror
-
-python3 process_pitching_yaw_transform.py -woodblock "notebooks/woodblock_z/02801_mk29_z.stl" -surface "notebooks/floor_z/02801_mk29_z.stl" -border "notebooks/raw_pitch_map/pitch_map_02801_mk30.json" -woodblock_dest "notebooks/woodblock_xyz" -depth_dest "notebooks/woodblock_depth_xyz" -inverted_matrix "notebooks/woodblock_inverted_matrix"
-
-python3 process_pitching_transform.py -woodblock "notebooks/woodblock_z/02801_mk29_z.stl" -surface "notebooks/surface_z/02801_mk29_z.stl" -floor "notebooks/floor_z/02801_mk29_z.stl" -depth_dest "notebooks/woodblock_depth_z" --upside
-
-python3 process_pitching_yaw_transform.py -woodblock "notebooks/whole_woodblock/whole_02801_mk29.stl" -floor "notebooks/floor_woodblock_points/floor_02801_mk29.stl" -border "notebooks/woodblock_border/border_02801_mk29.stl" -woodblock_dest "notebooks/woodblock_xyz" -depth_dest "notebooks/woodblock_depth_xyz" -inverted_matrix "notebooks/woodblock_inverted_matrix" --mirror
-
-
-python3 process_pitching_yaw_transform.py -woodblock "notebooks/whole_woodblock/whole_02801_mk30.stl" -floor "notebooks/floor_woodblock_points/floor_02801_mk30.stl" -border "notebooks/woodblock_border/border_02801_mk30.stl" -woodblock_dest "notebooks/woodblock_xyz" -depth_dest "notebooks/woodblock_depth_xyz" -inverted_matrix "notebooks/woodblock_inverted_matrix"
-
-python3 process_pitching_transform.py -woodblock "notebooks/whole_woodblock/whole_02801_mk30.stl" -floor "notebooks/floor_woodblock_points/floor_02801_mk30.stl" -depth_dest "notebooks/woodblock_depth_z" --inverted_matrix "notebooks/inverted_matrix_z"
-
-python3 process_pitching_yaw_transform.py -woodblock "notebooks/whole_woodblock/whole_02801_mk30.stl" -surface "notebooks/surface_woodblock_points/surface_02801_mk30.stl" -floor "notebooks/floor_woodblock_points/floor_02801_mk30.stl" -border "notebooks/rotate_whole_woodblock/whole_02801_mk30.json" -woodblock_dest "notebooks/woodblock_xyz" -depth_dest "notebooks/woodblock_depth_xyz" -inverted_matrix "notebooks/woodblock_inverted_matrix" -matrix_z "notebooks/inverted_matrix_z/whole_02801_mk30_z.npy" -surface_xyz "notebooks/surface_xyz"
+Do the cropping process to get character pairs:
+python3 cropping.py -woodblock 'notebooks/woodblock_xyz/whole_02801_mk29_xyz.stl' -surface "notebooks/surface_xyz/surface_02801_mk29_xyz.stl" -scan_img "notebooks/scan_imgs/02801_mk29.jpg" -pitch_map "notebooks/pitch_map/pitch_map_02801_mk29.json" -sina_nom_anno "notebooks/sina_nom_annos/02801_mk29.json" -aligned_matrix "notebooks/inverted_matrix_xyz/whole_02801_mk29_xyz.npy" -character_dest "notebooks/character_3d_aligned"

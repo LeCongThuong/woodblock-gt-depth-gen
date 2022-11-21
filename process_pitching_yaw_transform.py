@@ -56,34 +56,34 @@ def main():
         assert len(woodblock_path_list) == len(floor_path_list), \
             f"Num files of woodblock: {woodblock_path_list} is not equal to num file of surface: {floor_path_list}"
     for index, woodblock_path in tqdm(enumerate(woodblock_path_list)):
-        # try:
-        floor_path = floor_path_list[index]
-        surface_path = surface_path_list[index]
-        border_path = border_path_list[index]
+        try:
+            floor_path = floor_path_list[index]
+            surface_path = surface_path_list[index]
+            border_path = border_path_list[index]
 
-        pc_floor_points = read_stl_file(floor_path)
-        pc_surface_points = read_stl_file(surface_path)
-        pc_woodblock_points = read_stl_file(woodblock_path)
-        matrix_z = np.load(str(matrix_z_list[index]))
-        [_, border_points] = get_point_from_via_file(border_path, keyword='whole')
-        border_points = np.hstack((border_points, np.zeros((border_points.shape[0], 1))))
-        pc_woodblock_points, pc_surface_points = raw_pitch_transform_3d_points(pc_woodblock_points, pc_surface_points, pc_floor_points, border_points,
-                                                            matrix_z, args.mirror)
-        normalized_inverted_matrix, normalized_depth_img = convert_pc_to_depth_map(pc_woodblock_points)
+            pc_floor_points = read_stl_file(floor_path)
+            pc_surface_points = read_stl_file(surface_path)
+            pc_woodblock_points = read_stl_file(woodblock_path)
+            matrix_z = np.load(str(matrix_z_list[index]))
+            [_, border_points] = get_point_from_via_file(border_path, keyword='whole')
+            border_points = np.hstack((border_points, np.zeros((border_points.shape[0], 1))))
+            pc_woodblock_points, pc_surface_points = raw_pitch_transform_3d_points(pc_woodblock_points, pc_surface_points, pc_floor_points, border_points,
+                                                                matrix_z, args.mirror)
+            normalized_inverted_matrix, normalized_depth_img = convert_pc_to_depth_map(pc_woodblock_points)
 
-        cv2.imwrite(str(Path(args.depth_dest) / f'{woodblock_path.stem}_xyz.png'), normalized_depth_img)
-        o3d.io.write_triangle_mesh(str(Path(args.woodblock_dest) / f'{woodblock_path.stem}_xyz.stl'), pc_woodblock_points)
-        o3d.io.write_triangle_mesh(str(Path(args.surface_xyz) / f'{surface_path.stem}_xyz.stl'), pc_surface_points)
+            cv2.imwrite(str(Path(args.depth_dest) / f'{woodblock_path.stem}_xyz.png'), normalized_depth_img)
+            o3d.io.write_triangle_mesh(str(Path(args.woodblock_dest) / f'{woodblock_path.stem}_xyz.stl'), pc_woodblock_points)
+            o3d.io.write_triangle_mesh(str(Path(args.surface_xyz) / f'{surface_path.stem}_xyz.stl'), pc_surface_points)
 
-        with open(str(Path(args.inverted_matrix_path)/f'{woodblock_path.stem}_xyz.npy'), 'wb') as f:
-            np.save(f, normalized_inverted_matrix)
-        del pc_woodblock_points
-        del normalized_depth_img
-        del pc_surface_points
-        gc.collect()
-        # except Exception as e:
-        #     print(e)
-        #     print(woodblock_path.name)
+            with open(str(Path(args.inverted_matrix_path)/f'{woodblock_path.stem}_xyz.npy'), 'wb') as f:
+                np.save(f, normalized_inverted_matrix)
+            del pc_woodblock_points
+            del normalized_depth_img
+            del pc_surface_points
+            gc.collect()
+        except Exception as e:
+            print(e)
+            print(woodblock_path.name)
 
 
 if __name__ == '__main__':
