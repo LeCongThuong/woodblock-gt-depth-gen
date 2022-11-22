@@ -35,13 +35,16 @@ def get_point_from_via_file(via_json_path, keyword='whole'):
     return [np_src_point_list, np_dest_point_list]
 
 
-def get_border_points_from_via_file(via_json_path, key_src='depth_z'):
+def get_border_points_from_via_file(via_json_path, mirror=False, key_src='depth_z'):
     anno = read_json_file(via_json_path)
     depth_point_list = []
     for anno_key in anno.keys():
         if key_src in anno_key:
             for point_info in anno[anno_key]['regions']:
                 depth_point_list.append([point_info['shape_attributes']['cx'], point_info['shape_attributes']['cy']])
+    if not mirror:
+        border_points = depth_point_list[:2]
+        depth_point_list = [border_points[1], border_points[0]]
     np_depth_point_list = np.asarray(depth_point_list)
     return np_depth_point_list
 

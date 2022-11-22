@@ -68,7 +68,7 @@ def _transform_homo_points(np_points, transform_matrix):
     return homo_np_3d
 
 
-def get_3d_transform_matrix(surface_coeffs, border_point=None, matrix_z=None):
+def get_3d_transform_matrix(surface_coeffs, border_point=None, matrix_z=None, mirror=False):
     """
     Get the translation matrix such that the 3D object can "lie" on Oxy (the surface of 3D object is Oxy).
     If border_point not None, rotate 3D object such that upper width vector is same direction as vector (1, 0)
@@ -92,6 +92,8 @@ def get_3d_transform_matrix(surface_coeffs, border_point=None, matrix_z=None):
     if border_point is not None:
         border_point = _transform_homo_points(border_point, matrix_z)
         border_point[:, 2] = 0
+        if not mirror:
+            border_point[:, 0] = - border_point[:, 0]
         yaw_matrix = get_yaw_rot_matrix(border_point)
         transform_matrix = np.matmul(yaw_matrix, transform_matrix)
     return transform_matrix

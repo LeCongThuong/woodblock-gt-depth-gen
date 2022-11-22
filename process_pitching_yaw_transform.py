@@ -20,7 +20,7 @@ def process_pitching_yaw_transform(woodblock_path, floor_path, surface_path, bor
             pc_surface_points = read_stl_file(surface_path)
             pc_woodblock_points = read_stl_file(woodblock_path)
             matrix_z = np.load(str(matrix_z_path))
-            border_points = get_border_points_from_via_file(border_path)
+            border_points = get_border_points_from_via_file(border_path, mirror)
             border_points = np.hstack((border_points, np.zeros((border_points.shape[0], 1))))
             pc_woodblock_points, pc_surface_points = raw_pitch_transform_3d_points(pc_woodblock_points,
                                                                                    pc_surface_points,
