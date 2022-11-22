@@ -51,6 +51,9 @@ def process_path(woodblock_id, raw_dir, interim_dir, output_path, wb_key="whole_
 
     character_xyz_dir = os.path.join(woodblock_id_dest, "character_xyz")
     Path(character_xyz_dir).mkdir(exist_ok=True, parents=True)
+    Path(os.path.join(character_xyz_dir, 'stl')).mkdir(exist_ok=True, parents=True)
+    Path(os.path.join(character_xyz_dir, 'depth')).mkdir(exist_ok=True, parents=True)
+    Path(os.path.join(character_xyz_dir, 'print')).mkdir(exist_ok=True, parents=True)
     return sino_nom_path, print_img_path, mapping_path, woodblock_xyz_path, surface_xyz_path, matrix_xyz_path, depth_xyz_path, character_xyz_dir
 
 
