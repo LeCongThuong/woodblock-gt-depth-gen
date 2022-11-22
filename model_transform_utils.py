@@ -116,9 +116,6 @@ def transform_points(np_pc_points, transform_matrix, mirror=False):
         homo_pc_3d[:, 0] = - homo_pc_3d[:, 0]
 
     homo_pc_3d[:, 0] = - homo_pc_3d[:, 0]  # to similar to 2D scan images
-    # mean_vector = np.mean(homo_pc_3d, axis=0)
-    # mean_vector[2] = 0
-    # homo_pc_3d = homo_pc_3d - mean_vector
     return homo_pc_3d
 
 
