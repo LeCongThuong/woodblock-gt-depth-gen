@@ -64,35 +64,41 @@ def run():
     wb_id_list = content.split("\n")
 
     for index, wb_id in tqdm(enumerate(wb_id_list)):
-        sino_nom_path, print_img_path, mapping_path, woodblock_xyz_path, surface_xyz_path, matrix_xyz_path, depth_xyz_path, \
-        character_xyz_dir = process_path(wb_id, args.raw, args.interim, args.output)
-        aligned_matrix = np.load(str(matrix_xyz_path))
-        [point_2d_list, point_depth_list] = get_point_from_via_file(mapping_path, keyword='depth_xyz')
-        # print(point_2d_list, point_depth_list)
-        woodblock_points = read_stl_file(woodblock_xyz_path)
-        surface_points = read_stl_file(surface_xyz_path)
-        bboxes_2d_list = parse_bboxes_list_from_sino_nom_anno_file(sino_nom_path)
+        try:
+            sino_nom_path, print_img_path, mapping_path, woodblock_xyz_path, surface_xyz_path, matrix_xyz_path, depth_xyz_path, \
+            character_xyz_dir = process_path(wb_id, args.raw, args.interim, args.output)
+            aligned_matrix = np.load(str(matrix_xyz_path))
+            [point_2d_list, point_depth_list] = get_point_from_via_file(mapping_path, keyword='depth_xyz')
+            # print(point_2d_list, point_depth_list)
+            woodblock_points = read_stl_file(woodblock_xyz_path)
+            surface_points = read_stl_file(surface_xyz_path)
+            bboxes_2d_list = parse_bboxes_list_from_sino_nom_anno_file(sino_nom_path)
 
-        aligned_3d_character_list = crop_3d_characters(woodblock_points,
-                                                        surface_points,
-                                                        bboxes_2d_list,
-                                                        point_2d_list,
-                                                        point_depth_list,
-                                                        aligned_matrix
-                                                       )
+            aligned_3d_character_list = crop_3d_characters(woodblock_points,
+                                                            surface_points,
+                                                            bboxes_2d_list,
+                                                            point_2d_list,
+                                                            point_depth_list,
+                                                            aligned_matrix
+                                                           )
 
-        for w_index, aligned_3d_character in enumerate(aligned_3d_character_list):
-            o3d.io.write_triangle_mesh(os.path.join(character_xyz_dir, f'stl/{w_index}.stl'), aligned_3d_character)
+            for w_index, aligned_3d_character in enumerate(aligned_3d_character_list):
+                o3d.io.write_triangle_mesh(os.path.join(character_xyz_dir, f'stl/{w_index}.stl'), aligned_3d_character)
 
-        depth_img_list, _ = get_character_depth_imgs(aligned_3d_character_list)
+            depth_img_list, _ = get_character_depth_imgs(aligned_3d_character_list)
 
-        for c_index, character_depth in enumerate(depth_img_list):
-            cv2.imwrite(os.path.join(character_xyz_dir, f'depth/{c_index}.png'), character_depth)
+            for c_index, character_depth in enumerate(depth_img_list):
+                cv2.imwrite(os.path.join(character_xyz_dir, f'depth/{c_index}.png'), character_depth)
 
-        print_img = cv2.imread(print_img_path)
-        for s_index, bbox in enumerate(bboxes_2d_list):
-            character_img = crop_2d_img(print_img, bbox)
-            cv2.imwrite(str(os.path.join(character_xyz_dir, f'print/{s_index}.png')), character_img)
+            print_img = cv2.imread(print_img_path)
+            for s_index, bbox in enumerate(bboxes_2d_list):
+                character_img = crop_2d_img(print_img, bbox)
+                cv2.imwrite(str(os.path.join(character_xyz_dir, f'print/{s_index}.png')), character_img)
+        except Exception as e:
+            print(wb_id)
+            print(e)
+            with open(args.error_path, "a") as f:
+                f.write(f"{wb_id}\n")
 
 
 if __name__ == '__main__':

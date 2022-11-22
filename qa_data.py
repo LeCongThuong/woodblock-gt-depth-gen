@@ -22,7 +22,6 @@ def check_number_of_files(wb_id_dir_path, num_file=5):
 
 def check_name_of_all_files(wb_id_dir_path):
     wb_id = Path(wb_id_dir_path).stem
-    print(wb_id)
     file_path_list = list(Path(wb_id_dir_path).glob("*"))
     has_sf = False
     has_fl = False
