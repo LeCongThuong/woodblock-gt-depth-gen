@@ -37,3 +37,9 @@ The depth map ground-truth image generation contains 5 main steps:
     * python3 xyz_transform.py -id_path "data/wb_id.txt" -raw "data/raw" -mirror "data/mirror_wb_id.txt" -interim "data/interim" -output "data/output" -error "data/xyz_trans_error.txt"
   * Do crop transform (Step 5)
     * python3 cropping.py -id_path "data/wb_id.txt" -raw "data/raw" -interim "data/interim" -output "data/output" -error "data/cropping_error.txt"
+
+* Illustrated images
+
+
+Try this markdown:
+ ![alt text](assets/depth_map_generation.png)
