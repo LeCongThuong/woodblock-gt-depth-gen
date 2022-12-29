@@ -33,7 +33,11 @@ The depth map ground-truth image generation contains 5 main steps:
     * --raw    : the parent directory contains the raw wb data directories.
     * --interim: path to directory contains by-product result such as z_depth, surface_xyz, border points, v.v..
     * --output : path to the destination directory to save aligned model, aligned depth .
-    * --error  : path to the file listing error id of woodblocks in process. 
+    * --error  : path to the file listing error id of woodblocks in process.
+* [Option] Scan images need to aligned (horizontal line need to be parallel with width of its image). If not, need to do 2 steps:
+  * Use the VIA tool to get 2 points: points on top left and top right of woodblock scan image, save into json file.
+  * Run aligned_img.py to align images and its correspond annotations.
+
 ## 3. Example
   * Do batch z_transform (Step 1)
     * python3 z_transform.py -id_path "data/wb_id.txt" -raw "data/raw" -dest "data/interim" -error "data/z_trans_error.txt"

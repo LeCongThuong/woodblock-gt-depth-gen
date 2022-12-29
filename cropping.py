@@ -18,7 +18,7 @@ def parse_aug():
 
 
 def process_path(woodblock_id, raw_dir, interim_dir, output_path, wb_key="whole_xyz", sf_key="surface_xyz",
-                 mat_key='matrix_xyz', depth_key="depth_xyz", print_key="jpg", sino_key="json", register_key="mapping"):
+                 mat_key='matrix_xyz', depth_key="depth_xyz", print_key="png", sino_key="json", register_key="mapping"):
     woodblock_id_dir = os.path.join(raw_dir, woodblock_id)
     file_path_list = list(Path(woodblock_id_dir).glob("*"))
     # print(file_path_list)
