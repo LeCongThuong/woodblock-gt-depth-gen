@@ -213,7 +213,7 @@ def resize_image_to_square(image, dst=512, color=(255, 255, 255)):
     if height > width:
         top, bottom, left, right = 0, 0, delta // 2, delta - (delta // 2)
     else:
-        top, bottom, left, right =  delta // 2, delta - (delta // 2), 0, 0
+        top, bottom, left, right = delta // 2, delta - (delta // 2), 0, 0
     color = color
     new_img = cv2.copyMakeBorder(im, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)
     new_img = cv2.resize(new_img, (dst, dst))

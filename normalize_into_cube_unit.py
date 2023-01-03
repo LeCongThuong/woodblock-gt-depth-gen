@@ -98,9 +98,10 @@ def run_files(parent_dir):
         normalized_depth_path = os.path.join(wb_id_character_dir, "normalized_depth")
         Path(normalized_depth_path).mkdir(exist_ok=True, parents=True)
         stl_character_path_list = list(Path(stl_character_dir).glob("*.stl"))
-        for index, stl_character_path in enumerate(stl_character_path_list):
-            dest_normalized_stl_path = os.path.join(normalized_stl_path, f"{index}.stl")
-            dest_normalized_depth_path = os.path.join(normalized_depth_path, f"{index}.npy")
+        for stl_character_path in stl_character_path_list:
+            name_index = stl_character_path.stem
+            dest_normalized_stl_path = os.path.join(normalized_stl_path, f"{name_index}.stl")
+            dest_normalized_depth_path = os.path.join(normalized_depth_path, f"{name_index}.npy")
             run_a_file(str(stl_character_path), str(dest_normalized_stl_path), str(dest_normalized_depth_path))
 
 
